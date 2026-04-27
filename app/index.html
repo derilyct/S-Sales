@@ -593,7 +593,7 @@
 	</main>
 
 	<script>
-		const shoes = [
+		const defaultShoes = [
 			{
 				id: "shoe-001",
 				brand: "Nike",
@@ -635,6 +635,20 @@
 				image: ""
 			}
 		];
+
+		const loadShoes = () => {
+			try {
+				const saved = localStorage.getItem("s-sales-shoes");
+				if (saved) return JSON.parse(saved);
+			} catch (e) { /* ignore bad data */ }
+			return null;
+		};
+
+		const saveShoes = () => {
+			localStorage.setItem("s-sales-shoes", JSON.stringify(shoes));
+		};
+
+		const shoes = loadShoes() || JSON.parse(JSON.stringify(defaultShoes));
 
 		const state = {
 			brand: "All brands",
@@ -712,6 +726,7 @@
 							const reader = new FileReader();
 							reader.onload = (ev) => {
 								shoe.image = ev.target.result;
+								saveShoes();
 								renderCards();
 							};
 							reader.readAsDataURL(fileInput.files[0]);
@@ -825,6 +840,7 @@
 						shoe.lot = detailsRow.querySelector('[data-key="lot"]').value;
 						const priceVal = parseInt(detailsRow.querySelector('[data-key="price"]').value, 10);
 						shoe.price = isNaN(priceVal) ? 0 : priceVal;
+						saveShoes();
 						renderCards();
 					});
 
@@ -836,6 +852,7 @@
 						const idx = shoes.indexOf(shoe);
 						if (idx > -1) {
 							shoes.splice(idx, 1);
+							saveShoes();
 							renderCards();
 						}
 					});
@@ -980,6 +997,7 @@
 				description: "",
 				image: ""
 			});
+			saveShoes();
 			renderCards();
 		});
 
