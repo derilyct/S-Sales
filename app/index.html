@@ -1,0 +1,1053 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>S-Sales</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--bg-page: #e4e4e4;
+			--bg-panel: #ffffff;
+			--bg-image: #d9d9d9;
+			--text-main: #000000;
+			--text-muted: #848484;
+			--accent: #008EDE;
+			--card-gap: 32px;
+			--panel-pad: 16px;
+			--hero-size: 40px;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+			width: 100%;
+			overflow-x: hidden;
+		}
+
+		body {
+			font-family: "Roboto", sans-serif;
+			background: var(--bg-page);
+			background-image: url("page-bg.jpeg");
+			background-size: cover;
+			background-repeat: no-repeat;
+			background-attachment: fixed;
+			color: var(--text-main);
+		}
+
+		.page {
+			min-height: 100vh;
+			max-width: 414px;
+			margin: 0 auto;
+			padding: 16px;
+			display: flex;
+			flex-direction: column;
+			gap: 32px;
+		}
+
+		.hero {
+			width: 100%;
+		}
+
+		.hero-copy {
+			margin: 0;
+			font-size: var(--hero-size);
+			font-weight: 700;
+			line-height: 1.08;
+			text-transform: uppercase;
+		}
+
+		.hero-copy .scroll-link {
+			color: var(--accent);
+			text-decoration: underline;
+			text-underline-offset: 3px;
+			cursor: pointer;
+		}
+
+		.filters-wrap {
+			display: flex;
+			flex-direction: row;
+			gap: 32px;
+		}
+
+		.filter {
+			position: relative;
+			flex: 1 1 0;
+			min-width: 0;
+		}
+
+		.filter-toggle {
+			width: 100%;
+			border: 0;
+			background: #ffffff;
+			color: var(--text-main);
+			height: 35px;
+			padding: 8px 16px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			font-size: 16px;
+			font-weight: 700;
+			text-transform: uppercase;
+			cursor: pointer;
+		}
+
+		.filter-label {
+			flex: 1;
+			text-align: left;
+		}
+
+		.chevron {
+			width: 20px;
+			height: 20px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 14px;
+			line-height: 1;
+			transition: transform 0.2s ease;
+		}
+
+		.filter.open .chevron {
+			transform: rotate(180deg);
+		}
+
+		.filter-options {
+			display: none;
+			width: 100%;
+			margin: 4px 0 0;
+			padding: 8px 0;
+			list-style: none;
+			background: #ffffff;
+			border: 1px solid #d0d0d0;
+		}
+
+		.filter.open .filter-options {
+			display: block;
+		}
+
+		.filter-options button {
+			width: 100%;
+			border: 0;
+			background: transparent;
+			text-align: left;
+			padding: 10px 16px;
+			font-family: inherit;
+			font-size: 15px;
+			cursor: pointer;
+		}
+
+		.filter-options button:hover,
+		.filter-options button:focus-visible {
+			background: #ececec;
+			outline: none;
+		}
+
+		.listings {
+			display: flex;
+			flex-direction: column;
+			gap: var(--card-gap);
+		}
+
+		.shoe-card {
+			display: flex;
+			flex-direction: column;
+			width: 100%;
+			background: transparent;
+			overflow: hidden;
+			position: relative;
+		}
+
+		.shoe-image {
+			width: 100%;
+			height: 250px;
+			background: var(--bg-image);
+			display: grid;
+			place-items: center;
+			overflow: hidden;
+			position: relative;
+		}
+
+		.shoe-image img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			display: block;
+		}
+
+		.shoe-placeholder {
+			margin: 0;
+			color: var(--text-muted);
+			font-size: 16px;
+			font-weight: 700;
+		}
+
+		.shoe-body {
+			background: #ffffff;
+			padding: var(--panel-pad);
+			display: flex;
+			flex-direction: row;
+			gap: 32px;
+			align-items: center;
+		}
+
+		.shoe-body-content {
+			flex: 1;
+			min-width: 0;
+			display: flex;
+			flex-direction: column;
+			gap: 16px;
+		}
+
+		.contact-btn {
+			background: #ffffff;
+			border: 1px solid #008ede;
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+			justify-content: center;
+			cursor: pointer;
+			flex-shrink: 0;
+			padding: 16px;
+		}
+
+		.contact-btn svg {
+			width: 24px;
+			height: 24px;
+		}
+
+		.contact-overlay {
+			display: none;
+			position: absolute;
+			bottom: 0;
+			right: 0;
+			background: #ffffff;
+			box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.2);
+			padding: 32px;
+			flex-direction: column;
+			gap: 32px;
+			z-index: 10;
+		}
+
+		.contact-overlay.open {
+			display: flex;
+		}
+
+		.contact-overlay-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			width: 100%;
+		}
+
+		.contact-overlay-title {
+			margin: 0;
+			font-size: 16px;
+			font-weight: 700;
+			text-transform: uppercase;
+		}
+
+		.contact-close-btn {
+			background: transparent;
+			border: 0;
+			cursor: pointer;
+			padding: 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.contact-close-btn svg {
+			width: 24px;
+			height: 24px;
+		}
+
+		.contact-link {
+			color: var(--accent);
+			font-size: 16px;
+			font-weight: 700;
+			text-transform: uppercase;
+			text-decoration: none;
+			white-space: nowrap;
+		}
+
+		.desc-wrap {
+			display: flex;
+			flex-direction: column;
+		}
+
+		.meta-label {
+			margin: 0;
+			font-size: 10px;
+			font-weight: 700;
+			text-transform: uppercase;
+			line-height: 1.2;
+		}
+
+		.disc-text {
+			margin: 0;
+			font-size: 16px;
+			line-height: 1.2;
+		}
+
+		.details-row {
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-start;
+		}
+
+		.detail {
+			min-width: 0;
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+		}
+
+		.detail-value {
+			margin: 0;
+			font-size: 16px;
+			line-height: 1.2;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.detail-value.price {
+			font-weight: 700;
+		}
+
+		.empty-state {
+			margin: 8px 0 0;
+			font-size: 16px;
+			font-weight: 700;
+		}
+
+		/* Footer */
+		.footer {
+			background: #000000;
+			padding: 32px;
+			position: relative;
+		}
+
+		.edit-icon-btn {
+			background: transparent;
+			border: 0;
+			cursor: pointer;
+			padding: 4px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.edit-icon-btn svg {
+			width: 24px;
+			height: 24px;
+			color: #ffffff;
+		}
+
+		/* Auth overlay */
+		.auth-overlay {
+			display: none;
+			position: absolute;
+			bottom: 100%;
+			left: 0;
+			background: #ffffff;
+			box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.2);
+			padding: 32px;
+			flex-direction: column;
+			gap: 32px;
+			z-index: 20;
+			width: 276px;
+		}
+
+		.auth-overlay.open {
+			display: flex;
+		}
+
+		.auth-fields {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.auth-input {
+			width: 100%;
+			background: #e4e4e4;
+			border: 0;
+			padding: 8px;
+			font-family: inherit;
+			font-size: 16px;
+			font-weight: 700;
+			text-transform: uppercase;
+		}
+
+		.auth-submit {
+			background: transparent;
+			border: 0;
+			color: var(--accent);
+			font-family: inherit;
+			font-size: 16px;
+			font-weight: 700;
+			text-transform: uppercase;
+			cursor: pointer;
+			padding: 0;
+			text-align: left;
+		}
+
+		.auth-error {
+			color: #de0000;
+			font-size: 14px;
+			font-weight: 700;
+			margin: 0;
+			display: none;
+		}
+
+		.auth-error.visible {
+			display: block;
+		}
+
+		/* Edit mode */
+		.add-item-wrap {
+			display: none;
+		}
+
+		.add-item-wrap.visible {
+			display: flex;
+		}
+
+		.add-item-btn {
+			width: 100%;
+			background: #ffffff;
+			border: 1px solid var(--accent);
+			color: var(--accent);
+			font-family: inherit;
+			font-size: 16px;
+			font-weight: 700;
+			text-transform: uppercase;
+			padding: 8px 16px;
+			cursor: pointer;
+			height: 35px;
+		}
+
+		.filters-wrap.hidden {
+			display: none;
+		}
+
+		.hero-editable {
+			outline: none;
+			cursor: text;
+			border: 1px dashed var(--accent);
+			padding: 4px;
+		}
+
+		.edit-input {
+			width: 100%;
+			background: #e4e4e4;
+			border: 0;
+			padding: 8px;
+			font-family: inherit;
+			font-size: 16px;
+			font-weight: 400;
+		}
+
+		.edit-input-price {
+			width: 60px;
+			background: #e4e4e4;
+			border: 0;
+			padding: 8px;
+			font-family: inherit;
+			font-size: 16px;
+			font-weight: 700;
+			text-align: right;
+		}
+
+		.edit-actions {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			width: 100%;
+		}
+
+		.save-btn {
+			background: transparent;
+			border: 0;
+			color: var(--accent);
+			font-family: inherit;
+			font-size: 16px;
+			font-weight: 700;
+			text-transform: uppercase;
+			cursor: pointer;
+			padding: 0;
+		}
+
+		.delete-btn {
+			background: transparent;
+			border: 0;
+			color: #de0000;
+			font-family: inherit;
+			font-size: 16px;
+			font-weight: 700;
+			text-transform: uppercase;
+			cursor: pointer;
+			padding: 0;
+		}
+
+		.upload-label {
+			color: var(--accent);
+			font-size: 16px;
+			font-weight: 700;
+			text-transform: uppercase;
+			text-align: center;
+			cursor: pointer;
+			margin: 0;
+		}
+
+		.upload-input {
+			display: none;
+		}
+
+		@media (min-width: 768px) {
+			.page {
+				max-width: 900px;
+				padding: 40px;
+			}
+
+			.hero-copy {
+				font-size: 48px;
+				max-width: 780px;
+			}
+
+			.listings {
+				display: grid;
+				grid-template-columns: repeat(2, 1fr);
+				gap: 24px;
+			}
+		}
+
+		@media (min-width: 1024px) {
+			.page {
+				max-width: 1440px;
+			}
+
+			.hero-copy {
+				font-size: 56px;
+			}
+		}
+	</style>
+</head>
+<body>
+	<main class="page">
+		<section class="hero" aria-label="Introduction">
+			<h1 class="hero-copy">
+				HI, I'M DERICK.<br>
+				I'M IN STALEY HILLS AND I NEED TO OFFLOAD SOME KICKS.<br>
+				
+				<a class="scroll-link" href="#listings">SCROLL DOWN.</a>
+			</h1>
+		</section>
+
+		<section class="filters-wrap" aria-label="Shoe filters">
+			<div class="filter" id="brand-filter">
+				<button class="filter-toggle" type="button" aria-expanded="false" aria-controls="brand-options">
+					<span class="filter-label">Brands</span>
+					<span class="chevron" aria-hidden="true">⌄</span>
+				</button>
+				<ul class="filter-options" id="brand-options" role="listbox" aria-label="Brand options"></ul>
+			</div>
+
+			<div class="filter" id="size-filter">
+				<button class="filter-toggle" type="button" aria-expanded="false" aria-controls="size-options">
+					<span class="filter-label">Sizes</span>
+					<span class="chevron" aria-hidden="true">⌄</span>
+				</button>
+				<ul class="filter-options" id="size-options" role="listbox" aria-label="Size options"></ul>
+			</div>
+		</section>
+
+		<section class="listings" id="listings" aria-label="Shoe listings"></section>
+
+		<section class="add-item-wrap" id="add-item-wrap">
+			<button class="add-item-btn" type="button" id="add-item-btn">Add Item</button>
+		</section>
+
+		<footer class="footer" id="footer">
+			<button class="edit-icon-btn" type="button" id="edit-icon-btn" aria-label="Enter edit mode">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
+			</button>
+			<div class="auth-overlay" id="auth-overlay">
+				<div class="auth-fields">
+					<input class="auth-input" type="text" id="auth-id" placeholder="ID" autocomplete="off">
+					<input class="auth-input" type="password" id="auth-code" placeholder="CODE" autocomplete="off">
+				</div>
+				<p class="auth-error" id="auth-error">Invalid ID or code</p>
+				<button class="auth-submit" type="button" id="auth-submit">Enter</button>
+			</div>
+		</footer>
+	</main>
+
+	<script>
+		const shoes = [
+			{
+				id: "shoe-001",
+				brand: "Nike",
+				size: "10 / 10.5",
+				wear: 8,
+				lot: "129",
+				price: 140,
+				description: "Air Max 97 Silver Bullet, clean upper and strong sole.",
+				image: ""
+			},
+			{
+				id: "shoe-002",
+				brand: "Adidas",
+				size: "9 / 9.5",
+				wear: 7,
+				lot: "233",
+				price: 95,
+				description: "Ultraboost DNA in core black, light heel wear.",
+				image: ""
+			},
+			{
+				id: "shoe-003",
+				brand: "Jordan",
+				size: "11 / 11.5",
+				wear: 9,
+				lot: "388",
+				price: 185,
+				description: "Jordan 1 High with crisp leather and boxed laces.",
+				image: ""
+			},
+			{
+				id: "shoe-004",
+				brand: "New Balance",
+				size: "10 / 10.5",
+				wear: 8,
+				lot: "412",
+				price: 130,
+				description: "990v5 grey pair with premium suede panels.",
+				image: ""
+			}
+		];
+
+		const state = {
+			brand: "All brands",
+			size: "All sizes",
+			editMode: false
+		};
+
+		const listingsEl = document.getElementById("listings");
+		const brandFilterEl = document.getElementById("brand-filter");
+		const sizeFilterEl = document.getElementById("size-filter");
+		const filtersWrap = document.querySelector(".filters-wrap");
+		const addItemWrap = document.getElementById("add-item-wrap");
+		const addItemBtn = document.getElementById("add-item-btn");
+		const editIconBtn = document.getElementById("edit-icon-btn");
+		const authOverlay = document.getElementById("auth-overlay");
+		const authIdInput = document.getElementById("auth-id");
+		const authCodeInput = document.getElementById("auth-code");
+		const authSubmit = document.getElementById("auth-submit");
+		const authError = document.getElementById("auth-error");
+		const heroCopy = document.querySelector(".hero-copy");
+
+		const getUniqueSorted = (items, key) => {
+			const values = Array.from(new Set(items.map((item) => item[key])));
+			return values.sort((a, b) => a.localeCompare(b));
+		};
+
+		const brandOptions = ["All brands", ...getUniqueSorted(shoes, "brand")];
+		const sizeOptions = ["All sizes", ...getUniqueSorted(shoes, "size")];
+
+		const applyFilters = () => {
+			if (state.editMode) return shoes;
+			return shoes.filter((shoe) => {
+				const brandMatch = state.brand === "All brands" || shoe.brand === state.brand;
+				const sizeMatch = state.size === "All sizes" || shoe.size === state.size;
+				return brandMatch && sizeMatch;
+			});
+		};
+
+		const formatPrice = (value) => `$${value}`;
+
+		let nextId = shoes.length + 1;
+
+		const renderCards = () => {
+			const filtered = applyFilters();
+			listingsEl.innerHTML = "";
+
+			if (!filtered.length) {
+				const empty = document.createElement("p");
+				empty.className = "empty-state";
+				empty.textContent = state.editMode ? "No items yet. Click Add Item to create one." : "No shoes match the selected filters.";
+				listingsEl.append(empty);
+				return;
+			}
+
+			filtered.forEach((shoe) => {
+				const card = document.createElement("article");
+				card.className = "shoe-card";
+
+				const imageWrap = document.createElement("div");
+				imageWrap.className = "shoe-image";
+
+				if (state.editMode) {
+					const fileInput = document.createElement("input");
+					fileInput.type = "file";
+					fileInput.accept = "image/*";
+					fileInput.className = "upload-input";
+
+					const uploadLabel = document.createElement("label");
+					uploadLabel.className = "upload-label";
+					uploadLabel.textContent = "Upload Image";
+					uploadLabel.addEventListener("click", () => fileInput.click());
+
+					fileInput.addEventListener("change", () => {
+						if (fileInput.files && fileInput.files[0]) {
+							const reader = new FileReader();
+							reader.onload = (ev) => {
+								shoe.image = ev.target.result;
+								renderCards();
+							};
+							reader.readAsDataURL(fileInput.files[0]);
+						}
+					});
+
+					if (shoe.image) {
+						const img = document.createElement("img");
+						img.src = shoe.image;
+						img.alt = `${shoe.brand} shoe lot ${shoe.lot}`;
+						imageWrap.append(img);
+						uploadLabel.style.position = "absolute";
+						uploadLabel.style.bottom = "8px";
+						uploadLabel.style.right = "8px";
+						uploadLabel.style.background = "rgba(255,255,255,0.85)";
+						uploadLabel.style.padding = "4px 8px";
+					}
+
+					imageWrap.append(fileInput, uploadLabel);
+				} else if (shoe.image) {
+					const img = document.createElement("img");
+					img.src = shoe.image;
+					img.alt = `${shoe.brand} shoe lot ${shoe.lot}`;
+					imageWrap.append(img);
+				} else {
+					const placeholder = document.createElement("p");
+					placeholder.className = "shoe-placeholder";
+					placeholder.textContent = "Image of shoe shows here";
+					imageWrap.append(placeholder);
+				}
+
+				const body = document.createElement("div");
+				body.className = "shoe-body";
+				body.style.flexDirection = state.editMode ? "column" : "row";
+
+				if (state.editMode) {
+					const editContent = document.createElement("div");
+					editContent.className = "shoe-body-content";
+					editContent.style.gap = "16px";
+
+					const descInput = document.createElement("div");
+					descInput.style.background = "#e4e4e4";
+					descInput.style.padding = "8px";
+					const descField = document.createElement("input");
+					descField.className = "edit-input";
+					descField.type = "text";
+					descField.value = shoe.description;
+					descField.placeholder = "Shoe description goes here";
+					descInput.append(descField);
+
+					const detailsRow = document.createElement("div");
+					detailsRow.className = "details-row";
+
+					const makeEditDetail = (label, value, key) => {
+						const wrap = document.createElement("div");
+						wrap.className = "detail";
+						const lbl = document.createElement("p");
+						lbl.className = "meta-label";
+						lbl.textContent = label;
+						const inp = document.createElement("input");
+						inp.className = "edit-input";
+						inp.style.width = "auto";
+						inp.type = "text";
+						inp.value = value;
+						inp.dataset.key = key;
+						wrap.append(lbl, inp);
+						return wrap;
+					};
+
+					const priceWrap = document.createElement("div");
+					priceWrap.className = "detail";
+					const priceLbl = document.createElement("p");
+					priceLbl.className = "meta-label";
+					priceLbl.textContent = "Price";
+					const priceRow = document.createElement("div");
+					priceRow.style.display = "flex";
+					priceRow.style.gap = "4px";
+					priceRow.style.alignItems = "center";
+					const dollarSign = document.createElement("span");
+					dollarSign.textContent = "$";
+					dollarSign.style.fontWeight = "700";
+					dollarSign.style.fontSize = "16px";
+					const priceInp = document.createElement("input");
+					priceInp.className = "edit-input-price";
+					priceInp.type = "text";
+					priceInp.value = shoe.price;
+					priceInp.dataset.key = "price";
+					priceRow.append(dollarSign, priceInp);
+					priceWrap.append(priceLbl, priceRow);
+
+					detailsRow.append(
+						makeEditDetail("Size", shoe.size, "size"),
+						makeEditDetail("Wear", shoe.wear, "wear"),
+						makeEditDetail("Lot #", shoe.lot, "lot"),
+						priceWrap
+					);
+
+					editContent.append(descInput, detailsRow);
+
+					const actions = document.createElement("div");
+					actions.className = "edit-actions";
+
+					const saveBtn = document.createElement("button");
+					saveBtn.className = "save-btn";
+					saveBtn.type = "button";
+					saveBtn.textContent = "Save";
+					saveBtn.addEventListener("click", () => {
+						shoe.description = descField.value;
+						shoe.size = detailsRow.querySelector('[data-key="size"]').value;
+						shoe.wear = detailsRow.querySelector('[data-key="wear"]').value;
+						shoe.lot = detailsRow.querySelector('[data-key="lot"]').value;
+						const priceVal = parseInt(detailsRow.querySelector('[data-key="price"]').value, 10);
+						shoe.price = isNaN(priceVal) ? 0 : priceVal;
+						renderCards();
+					});
+
+					const deleteBtn = document.createElement("button");
+					deleteBtn.className = "delete-btn";
+					deleteBtn.type = "button";
+					deleteBtn.textContent = "Delete";
+					deleteBtn.addEventListener("click", () => {
+						const idx = shoes.indexOf(shoe);
+						if (idx > -1) {
+							shoes.splice(idx, 1);
+							renderCards();
+						}
+					});
+
+					actions.append(saveBtn, deleteBtn);
+					body.append(editContent, actions);
+				} else {
+					const descWrap = document.createElement("div");
+					descWrap.className = "desc-wrap";
+					descWrap.innerHTML = `<p class="disc-text">${shoe.description}</p>`;
+
+					const details = document.createElement("div");
+					details.className = "details-row";
+					details.innerHTML = `
+						<div class="detail">
+							<p class="meta-label">Size</p>
+							<p class="detail-value">${shoe.size}</p>
+						</div>
+						<div class="detail">
+							<p class="meta-label">Wear</p>
+							<p class="detail-value">${shoe.wear}</p>
+						</div>
+						<div class="detail">
+							<p class="meta-label">Lot #</p>
+							<p class="detail-value">${shoe.lot}</p>
+						</div>
+						<div class="detail">
+							<p class="meta-label">Price</p>
+							<p class="detail-value price">${formatPrice(shoe.price)}</p>
+						</div>
+					`;
+
+					const bodyContent = document.createElement("div");
+					bodyContent.className = "shoe-body-content";
+					bodyContent.append(descWrap, details);
+
+					const contactBtn = document.createElement("button");
+					contactBtn.className = "contact-btn";
+					contactBtn.type = "button";
+					contactBtn.setAttribute("aria-label", "Contact about this shoe");
+					contactBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>`;
+
+					const phoneNumber = "8168533970";
+					const emailAddress = "derick.berry@gmail.com";
+					const contactBody = `${shoe.description}\nSize: ${shoe.size}\nLot #: ${shoe.lot}\nPrice: ${formatPrice(shoe.price)}`;
+					const emailSubject = `I'm interested in lot ${shoe.lot}`;
+
+					const smsHref = `sms:${phoneNumber}?body=${encodeURIComponent(contactBody)}`;
+					const mailHref = `mailto:${emailAddress}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(contactBody)}`;
+
+					const overlay = document.createElement("div");
+					overlay.className = "contact-overlay";
+					overlay.innerHTML = `
+						<div class="contact-overlay-header">
+							<p class="contact-overlay-title">Contact</p>
+							<button class="contact-close-btn" type="button" aria-label="Close contact overlay">
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+							</button>
+						</div>
+						<a class="contact-link" href="${smsHref}">Text @ 816.853.3970</a>
+						<a class="contact-link" href="${mailHref}">${emailAddress}</a>
+					`;
+
+					contactBtn.addEventListener("click", (e) => {
+						e.stopPropagation();
+						document.querySelectorAll(".contact-overlay.open").forEach((el) => {
+							if (el !== overlay) el.classList.remove("open");
+						});
+						overlay.classList.toggle("open");
+					});
+
+					overlay.querySelector(".contact-close-btn").addEventListener("click", (e) => {
+						e.stopPropagation();
+						overlay.classList.remove("open");
+					});
+
+					overlay.addEventListener("click", (e) => e.stopPropagation());
+
+					body.append(bodyContent, contactBtn);
+					card.append(imageWrap, body, overlay);
+					listingsEl.append(card);
+					return;
+				}
+
+				card.append(imageWrap, body);
+				listingsEl.append(card);
+			});
+		};
+
+		const enterEditMode = () => {
+			state.editMode = true;
+			filtersWrap.classList.add("hidden");
+			addItemWrap.classList.add("visible");
+			heroCopy.setAttribute("contenteditable", "true");
+			heroCopy.classList.add("hero-editable");
+			renderCards();
+		};
+
+		const exitEditMode = () => {
+			state.editMode = false;
+			filtersWrap.classList.remove("hidden");
+			addItemWrap.classList.remove("visible");
+			heroCopy.removeAttribute("contenteditable");
+			heroCopy.classList.remove("hero-editable");
+			renderCards();
+		};
+
+		editIconBtn.addEventListener("click", (e) => {
+			e.stopPropagation();
+			if (state.editMode) {
+				exitEditMode();
+				return;
+			}
+			authOverlay.classList.toggle("open");
+			authError.classList.remove("visible");
+			authIdInput.value = "";
+			authCodeInput.value = "";
+		});
+
+		authSubmit.addEventListener("click", () => {
+			const id = authIdInput.value.trim();
+			const code = authCodeInput.value.trim();
+			if (id === "Derilyct" && code === "126839") {
+				authOverlay.classList.remove("open");
+				enterEditMode();
+			} else {
+				authError.classList.add("visible");
+			}
+		});
+
+		authOverlay.addEventListener("click", (e) => e.stopPropagation());
+
+		addItemBtn.addEventListener("click", () => {
+			nextId++;
+			shoes.push({
+				id: `shoe-${String(nextId).padStart(3, "0")}`,
+				brand: "",
+				size: "",
+				wear: 0,
+				lot: "",
+				price: 0,
+				description: "",
+				image: ""
+			});
+			renderCards();
+		});
+
+		const closeOtherFilter = (currentFilterEl) => {
+			[brandFilterEl, sizeFilterEl].forEach((filterEl) => {
+				if (filterEl !== currentFilterEl) {
+					filterEl.classList.remove("open");
+					filterEl.querySelector(".filter-toggle").setAttribute("aria-expanded", "false");
+				}
+			});
+		};
+
+		const setFilterLabel = (filterEl, value) => {
+			filterEl.querySelector(".filter-label").textContent = value;
+		};
+
+		const buildFilterOptions = (filterEl, options, stateKey) => {
+			const list = filterEl.querySelector(".filter-options");
+			list.innerHTML = "";
+
+			options.forEach((value) => {
+				const item = document.createElement("li");
+				const button = document.createElement("button");
+				button.type = "button";
+				button.textContent = value;
+				button.addEventListener("click", () => {
+					state[stateKey] = value;
+					setFilterLabel(filterEl, value);
+					filterEl.classList.remove("open");
+					filterEl.querySelector(".filter-toggle").setAttribute("aria-expanded", "false");
+					renderCards();
+				});
+				item.append(button);
+				list.append(item);
+			});
+
+			const toggle = filterEl.querySelector(".filter-toggle");
+			toggle.addEventListener("click", () => {
+				const isOpen = filterEl.classList.contains("open");
+				closeOtherFilter(filterEl);
+				filterEl.classList.toggle("open", !isOpen);
+				toggle.setAttribute("aria-expanded", String(!isOpen));
+			});
+		};
+
+		buildFilterOptions(brandFilterEl, brandOptions, "brand");
+		buildFilterOptions(sizeFilterEl, sizeOptions, "size");
+		setFilterLabel(brandFilterEl, state.brand);
+		setFilterLabel(sizeFilterEl, state.size);
+		renderCards();
+
+		document.addEventListener("click", (event) => {
+			if (!brandFilterEl.contains(event.target)) {
+				brandFilterEl.classList.remove("open");
+				brandFilterEl.querySelector(".filter-toggle").setAttribute("aria-expanded", "false");
+			}
+			if (!sizeFilterEl.contains(event.target)) {
+				sizeFilterEl.classList.remove("open");
+				sizeFilterEl.querySelector(".filter-toggle").setAttribute("aria-expanded", "false");
+			}
+			document.querySelectorAll(".contact-overlay.open").forEach((el) => {
+				el.classList.remove("open");
+			});
+			const footer = document.getElementById("footer");
+			if (!footer.contains(event.target)) {
+				authOverlay.classList.remove("open");
+			}
+		});
+	</script>
+</body>
+</html>
