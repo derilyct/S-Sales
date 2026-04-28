@@ -20,6 +20,7 @@ ms.date: 2026-04-24
 * R12: Edit Mode
 * R13: Auto Assign Lots
 * R14: Image Updates
+* R15: Loading Spinner
 
 ## Task checklist
 
@@ -258,5 +259,9 @@ ms.date: 2026-04-24
 * [x] Task 59: Center uploaded images vertically inside the card image container
 	Satisfies: R14
 	Done when: Shoe images are vertically centered within the image area so the shoe is not cropped at the bottom, especially on desktop.
+
+* [x] Task 60: Show a loading animation while shoe cards are being fetched
+	Satisfies: R15
+	Done when: A visible loading indicator appears on page load and disappears once shoe data has loaded and cards are rendered.
 
 

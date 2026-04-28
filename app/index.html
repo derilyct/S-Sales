@@ -542,6 +542,30 @@
 			height: 32px;
 		}
 
+		.loader {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			padding: 64px 0;
+		}
+
+		.loader.hidden {
+			display: none;
+		}
+
+		.spinner {
+			width: 40px;
+			height: 40px;
+			border: 4px solid #e4e4e4;
+			border-top-color: var(--accent);
+			border-radius: 50%;
+			animation: spin 0.8s linear infinite;
+		}
+
+		@keyframes spin {
+			to { transform: rotate(360deg); }
+		}
+
 		@media (min-width: 768px) {
 			.page {
 				max-width: 900px;
@@ -599,6 +623,10 @@
 		</section>
 
 		<section class="listings" id="listings" aria-label="Shoe listings"></section>
+
+		<div class="loader" id="loader">
+			<div class="spinner"></div>
+		</div>
 
 		<section class="add-item-wrap" id="add-item-wrap">
 			<button class="add-item-btn" type="button" id="add-item-btn">Add Item</button>
@@ -1098,6 +1126,7 @@
 				data.forEach((s) => shoes.push(s));
 				nextId = Math.max(...shoes.map((s) => parseInt(s.id.replace("shoe-", ""), 10) || 0)) + 1;
 			}
+			document.getElementById("loader").classList.add("hidden");
 			renderCards();
 		})();
 
