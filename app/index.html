@@ -723,9 +723,6 @@
 			return values.sort((a, b) => a.localeCompare(b));
 		};
 
-		const brandOptions = ["All brands", ...getUniqueSorted(shoes, "brand")];
-		const sizeOptions = ["All sizes", ...getUniqueSorted(shoes, "size")];
-
 		const applyFilters = () => {
 			if (state.editMode) return shoes;
 			return shoes.filter((shoe) => {
@@ -740,6 +737,7 @@
 		let nextId = 5;
 
 		const renderCards = () => {
+			if (typeof refreshFilters === "function") refreshFilters();
 			const filtered = applyFilters();
 			listingsEl.innerHTML = "";
 
@@ -772,9 +770,15 @@
 					fileInput.addEventListener("change", () => {
 						if (fileInput.files && fileInput.files[0]) {
 							const reader = new FileReader();
-							reader.onload = (ev) => {
-								shoe.image = ev.target.result;
-								sb.from("shoes").update({ image: shoe.image }).eq("id", shoe.id).then(() => renderCards());
+							reader.onload = async (ev) => {
+								const newImage = ev.target.result;
+								const { error } = await sb.from("shoes").update({ image: newImage }).eq("id", shoe.id);
+								if (error) {
+									console.error("Image upload failed:", error);
+									return;
+								}
+								shoe.image = newImage;
+								renderCards();
 							};
 							reader.readAsDataURL(fileInput.files[0]);
 						}
@@ -896,31 +900,47 @@
 					saveBtn.className = "save-btn";
 					saveBtn.type = "button";
 					saveBtn.textContent = "Save";
-					saveBtn.addEventListener("click", () => {
-						shoe.description = descField.value;
-						shoe.size = detailsRow.querySelector('[data-key="size"]').value;
-						shoe.wear = detailsRow.querySelector('[data-key="wear"]').value;
-						shoe.lot = detailsRow.querySelector('[data-key="lot"]').value;
+					saveBtn.addEventListener("click", async () => {
+						const newDesc = descField.value;
+						const newSize = detailsRow.querySelector('[data-key="size"]').value;
+						const wearVal = parseInt(detailsRow.querySelector('[data-key="wear"]').value, 10);
+						const newWear = isNaN(wearVal) ? 0 : wearVal;
+						const newLot = detailsRow.querySelector('[data-key="lot"]').value;
 						const priceVal = parseInt(detailsRow.querySelector('[data-key="price"]').value, 10);
-						shoe.price = isNaN(priceVal) ? 0 : priceVal;
-						sb.from("shoes").update({
-							description: shoe.description,
-							size: shoe.size,
-							wear: shoe.wear,
-							lot: shoe.lot,
-							price: shoe.price
-						}).eq("id", shoe.id).then(() => renderCards());
+						const newPrice = isNaN(priceVal) ? 0 : priceVal;
+						const { error } = await sb.from("shoes").update({
+							description: newDesc,
+							size: newSize,
+							wear: newWear,
+							lot: newLot,
+							price: newPrice
+						}).eq("id", shoe.id);
+						if (error) {
+							console.error("Save failed:", error);
+							return;
+						}
+						shoe.description = newDesc;
+						shoe.size = newSize;
+						shoe.wear = newWear;
+						shoe.lot = newLot;
+						shoe.price = newPrice;
+						renderCards();
 					});
 
 					const deleteBtn = document.createElement("button");
 					deleteBtn.className = "delete-btn";
 					deleteBtn.type = "button";
 					deleteBtn.textContent = "Delete";
-					deleteBtn.addEventListener("click", () => {
+					deleteBtn.addEventListener("click", async () => {
 						const idx = shoes.indexOf(shoe);
 						if (idx > -1) {
+							const { error } = await sb.from("shoes").delete().eq("id", shoe.id);
+							if (error) {
+								console.error("Delete failed:", error);
+								return;
+							}
 							shoes.splice(idx, 1);
-							sb.from("shoes").delete().eq("id", shoe.id).then(() => renderCards());
+							renderCards();
 						}
 					});
 
@@ -1085,7 +1105,7 @@
 			filterEl.querySelector(".filter-label").textContent = value;
 		};
 
-		const buildFilterOptions = (filterEl, options, stateKey) => {
+		const rebuildFilterOptions = (filterEl, options, stateKey) => {
 			const list = filterEl.querySelector(".filter-options");
 			list.innerHTML = "";
 
@@ -1104,20 +1124,27 @@
 				item.append(button);
 				list.append(item);
 			});
+		};
 
-			const toggle = filterEl.querySelector(".filter-toggle");
-			toggle.addEventListener("click", () => {
+		const refreshFilters = () => {
+			const brandOptions = ["All brands", ...getUniqueSorted(shoes, "brand")];
+			const sizeOptions = ["All sizes", ...getUniqueSorted(shoes, "size")];
+			rebuildFilterOptions(brandFilterEl, brandOptions, "brand");
+			rebuildFilterOptions(sizeFilterEl, sizeOptions, "size");
+			setFilterLabel(brandFilterEl, state.brand);
+			setFilterLabel(sizeFilterEl, state.size);
+		};
+
+		[brandFilterEl, sizeFilterEl].forEach((filterEl) => {
+			filterEl.querySelector(".filter-toggle").addEventListener("click", () => {
 				const isOpen = filterEl.classList.contains("open");
 				closeOtherFilter(filterEl);
 				filterEl.classList.toggle("open", !isOpen);
-				toggle.setAttribute("aria-expanded", String(!isOpen));
+				filterEl.querySelector(".filter-toggle").setAttribute("aria-expanded", String(!isOpen));
 			});
-		};
+		});
 
-		buildFilterOptions(brandFilterEl, brandOptions, "brand");
-		buildFilterOptions(sizeFilterEl, sizeOptions, "size");
-		setFilterLabel(brandFilterEl, state.brand);
-		setFilterLabel(sizeFilterEl, state.size);
+		refreshFilters();
 
 		(async () => {
 			const { data } = await sb.from("shoes").select("*");
