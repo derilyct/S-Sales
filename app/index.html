@@ -771,14 +771,10 @@
 						if (fileInput.files && fileInput.files[0]) {
 							const reader = new FileReader();
 							reader.onload = async (ev) => {
-								const newImage = ev.target.result;
-								const { error } = await sb.from("shoes").update({ image: newImage }).eq("id", shoe.id);
-								if (error) {
-									console.error("Image upload failed:", error);
-									return;
-								}
-								shoe.image = newImage;
+								shoe.image = ev.target.result;
 								renderCards();
+								const { error } = await sb.from("shoes").update({ image: shoe.image }).eq("id", shoe.id);
+								if (error) console.error("Image upload failed:", error);
 							};
 							reader.readAsDataURL(fileInput.files[0]);
 						}
@@ -901,30 +897,22 @@
 					saveBtn.type = "button";
 					saveBtn.textContent = "Save";
 					saveBtn.addEventListener("click", async () => {
-						const newDesc = descField.value;
-						const newSize = detailsRow.querySelector('[data-key="size"]').value;
+						shoe.description = descField.value;
+						shoe.size = detailsRow.querySelector('[data-key="size"]').value;
 						const wearVal = parseInt(detailsRow.querySelector('[data-key="wear"]').value, 10);
-						const newWear = isNaN(wearVal) ? 0 : wearVal;
-						const newLot = detailsRow.querySelector('[data-key="lot"]').value;
+						shoe.wear = isNaN(wearVal) ? 0 : wearVal;
+						shoe.lot = detailsRow.querySelector('[data-key="lot"]').value;
 						const priceVal = parseInt(detailsRow.querySelector('[data-key="price"]').value, 10);
-						const newPrice = isNaN(priceVal) ? 0 : priceVal;
-						const { error } = await sb.from("shoes").update({
-							description: newDesc,
-							size: newSize,
-							wear: newWear,
-							lot: newLot,
-							price: newPrice
-						}).eq("id", shoe.id);
-						if (error) {
-							console.error("Save failed:", error);
-							return;
-						}
-						shoe.description = newDesc;
-						shoe.size = newSize;
-						shoe.wear = newWear;
-						shoe.lot = newLot;
-						shoe.price = newPrice;
+						shoe.price = isNaN(priceVal) ? 0 : priceVal;
 						renderCards();
+						const { error } = await sb.from("shoes").update({
+							description: shoe.description,
+							size: shoe.size,
+							wear: shoe.wear,
+							lot: shoe.lot,
+							price: shoe.price
+						}).eq("id", shoe.id);
+						if (error) console.error("Save failed:", error);
 					});
 
 					const deleteBtn = document.createElement("button");
@@ -934,13 +922,10 @@
 					deleteBtn.addEventListener("click", async () => {
 						const idx = shoes.indexOf(shoe);
 						if (idx > -1) {
-							const { error } = await sb.from("shoes").delete().eq("id", shoe.id);
-							if (error) {
-								console.error("Delete failed:", error);
-								return;
-							}
 							shoes.splice(idx, 1);
 							renderCards();
+							const { error } = await sb.from("shoes").delete().eq("id", shoe.id);
+							if (error) console.error("Delete failed:", error);
 						}
 					});
 
