@@ -592,6 +592,7 @@
 		</footer>
 	</main>
 
+	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 	<script>
 		const defaultShoes = [
 			{
@@ -636,19 +637,11 @@
 			}
 		];
 
-		const loadShoes = () => {
-			try {
-				const saved = localStorage.getItem("s-sales-shoes");
-				if (saved) return JSON.parse(saved);
-			} catch (e) { /* ignore bad data */ }
-			return null;
-		};
+		const SUPABASE_URL = "https://cqcowfmkqrssimnivxoq.supabase.co";
+		const SUPABASE_KEY = "sb_publishable_3w9QjrUpLoyMa1LXQkjwbw_n_X2my-g";
+		const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-		const saveShoes = () => {
-			localStorage.setItem("s-sales-shoes", JSON.stringify(shoes));
-		};
-
-		const shoes = loadShoes() || JSON.parse(JSON.stringify(defaultShoes));
+		let shoes = [];
 
 		const state = {
 			brand: "All brands",
@@ -689,7 +682,7 @@
 
 		const formatPrice = (value) => `$${value}`;
 
-		let nextId = shoes.length + 1;
+		let nextId = 5;
 
 		const renderCards = () => {
 			const filtered = applyFilters();
@@ -726,8 +719,7 @@
 							const reader = new FileReader();
 							reader.onload = (ev) => {
 								shoe.image = ev.target.result;
-								saveShoes();
-								renderCards();
+								sb.from("shoes").update({ image: shoe.image }).eq("id", shoe.id).then(() => renderCards());
 							};
 							reader.readAsDataURL(fileInput.files[0]);
 						}
@@ -840,8 +832,13 @@
 						shoe.lot = detailsRow.querySelector('[data-key="lot"]').value;
 						const priceVal = parseInt(detailsRow.querySelector('[data-key="price"]').value, 10);
 						shoe.price = isNaN(priceVal) ? 0 : priceVal;
-						saveShoes();
-						renderCards();
+						sb.from("shoes").update({
+							description: shoe.description,
+							size: shoe.size,
+							wear: shoe.wear,
+							lot: shoe.lot,
+							price: shoe.price
+						}).eq("id", shoe.id).then(() => renderCards());
 					});
 
 					const deleteBtn = document.createElement("button");
@@ -852,8 +849,7 @@
 						const idx = shoes.indexOf(shoe);
 						if (idx > -1) {
 							shoes.splice(idx, 1);
-							saveShoes();
-							renderCards();
+							sb.from("shoes").delete().eq("id", shoe.id).then(() => renderCards());
 						}
 					});
 
@@ -985,9 +981,9 @@
 
 		authOverlay.addEventListener("click", (e) => e.stopPropagation());
 
-		addItemBtn.addEventListener("click", () => {
+		addItemBtn.addEventListener("click", async () => {
 			nextId++;
-			shoes.push({
+			const newShoe = {
 				id: `shoe-${String(nextId).padStart(3, "0")}`,
 				brand: "",
 				size: "",
@@ -996,8 +992,9 @@
 				price: 0,
 				description: "",
 				image: ""
-			});
-			saveShoes();
+			};
+			await sb.from("shoes").insert(newShoe);
+			shoes.push(newShoe);
 			renderCards();
 		});
 
@@ -1047,7 +1044,16 @@
 		buildFilterOptions(sizeFilterEl, sizeOptions, "size");
 		setFilterLabel(brandFilterEl, state.brand);
 		setFilterLabel(sizeFilterEl, state.size);
-		renderCards();
+
+		(async () => {
+			const { data } = await sb.from("shoes").select("*");
+			if (data && data.length) {
+				shoes.length = 0;
+				data.forEach((s) => shoes.push(s));
+				nextId = Math.max(...shoes.map((s) => parseInt(s.id.replace("shoe-", ""), 10) || 0)) + 1;
+			}
+			renderCards();
+		})();
 
 		document.addEventListener("click", (event) => {
 			if (!brandFilterEl.contains(event.target)) {
