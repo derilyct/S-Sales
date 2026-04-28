@@ -324,9 +324,12 @@
 
 		/* Footer */
 		.footer {
-			background: #000000;
-			padding: 32px;
+			background: #e4e4e4;
+			padding: 16px;
 			position: relative;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
 		}
 
 		.edit-icon-btn {
@@ -342,7 +345,24 @@
 		.edit-icon-btn svg {
 			width: 24px;
 			height: 24px;
-			color: #ffffff;
+			color: #000000;
+		}
+
+		.footer-save-btn {
+			display: none;
+			background: transparent;
+			border: 0;
+			color: var(--accent);
+			font-family: inherit;
+			font-size: 16px;
+			font-weight: 700;
+			text-transform: uppercase;
+			cursor: pointer;
+			padding: 0;
+		}
+
+		.footer-save-btn.visible {
+			display: block;
 		}
 
 		/* Auth overlay */
@@ -463,21 +483,9 @@
 
 		.edit-actions {
 			display: flex;
-			justify-content: space-between;
+			justify-content: flex-end;
 			align-items: center;
 			width: 100%;
-		}
-
-		.save-btn {
-			background: transparent;
-			border: 0;
-			color: var(--accent);
-			font-family: inherit;
-			font-size: 16px;
-			font-weight: 700;
-			text-transform: uppercase;
-			cursor: pointer;
-			padding: 0;
 		}
 
 		.delete-btn {
@@ -636,6 +644,7 @@
 			<button class="edit-icon-btn" type="button" id="edit-icon-btn" aria-label="Enter edit mode">
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
 			</button>
+			<button class="footer-save-btn" type="button" id="footer-save-btn">Save</button>
 			<div class="auth-overlay" id="auth-overlay">
 				<div class="auth-fields">
 					<input class="auth-input" type="text" id="auth-id" placeholder="ID" autocomplete="off">
@@ -711,6 +720,7 @@
 		const addItemWrap = document.getElementById("add-item-wrap");
 		const addItemBtn = document.getElementById("add-item-btn");
 		const editIconBtn = document.getElementById("edit-icon-btn");
+		const footerSaveBtn = document.getElementById("footer-save-btn");
 		const authOverlay = document.getElementById("auth-overlay");
 		const authIdInput = document.getElementById("auth-id");
 		const authCodeInput = document.getElementById("auth-code");
@@ -892,29 +902,6 @@
 					const actions = document.createElement("div");
 					actions.className = "edit-actions";
 
-					const saveBtn = document.createElement("button");
-					saveBtn.className = "save-btn";
-					saveBtn.type = "button";
-					saveBtn.textContent = "Save";
-					saveBtn.addEventListener("click", async () => {
-						shoe.description = descField.value;
-						shoe.size = detailsRow.querySelector('[data-key="size"]').value;
-						const wearVal = parseInt(detailsRow.querySelector('[data-key="wear"]').value, 10);
-						shoe.wear = isNaN(wearVal) ? 0 : wearVal;
-						shoe.lot = detailsRow.querySelector('[data-key="lot"]').value;
-						const priceVal = parseInt(detailsRow.querySelector('[data-key="price"]').value, 10);
-						shoe.price = isNaN(priceVal) ? 0 : priceVal;
-						renderCards();
-						const { error } = await sb.from("shoes").update({
-							description: shoe.description,
-							size: shoe.size,
-							wear: shoe.wear,
-							lot: shoe.lot,
-							price: shoe.price
-						}).eq("id", shoe.id);
-						if (error) console.error("Save failed:", error);
-					});
-
 					const deleteBtn = document.createElement("button");
 					deleteBtn.className = "delete-btn";
 					deleteBtn.type = "button";
@@ -929,7 +916,7 @@
 						}
 					});
 
-					actions.append(saveBtn, deleteBtn);
+					actions.append(deleteBtn);
 					body.append(editContent, actions);
 				} else {
 					const descWrap = document.createElement("div");
@@ -1018,19 +1005,53 @@
 			state.editMode = true;
 			filtersWrap.classList.add("hidden");
 			addItemWrap.classList.add("visible");
+			footerSaveBtn.classList.add("visible");
 			heroCopy.setAttribute("contenteditable", "true");
 			heroCopy.classList.add("hero-editable");
 			renderCards();
 		};
 
+		const saveAllCards = () => {
+			const cards = listingsEl.querySelectorAll(".shoe-card");
+			cards.forEach((card, i) => {
+				const shoe = shoes[i];
+				if (!shoe) return;
+				const descField = card.querySelector(".edit-input");
+				if (!descField) return;
+				shoe.description = descField.value;
+				shoe.size = card.querySelector('[data-key="size"]').value;
+				const wearVal = parseInt(card.querySelector('[data-key="wear"]').value, 10);
+				shoe.wear = isNaN(wearVal) ? 0 : wearVal;
+				shoe.lot = card.querySelector('[data-key="lot"]').value;
+				const priceVal = parseInt(card.querySelector('[data-key="price"]').value, 10);
+				shoe.price = isNaN(priceVal) ? 0 : priceVal;
+				sb.from("shoes").update({
+					description: shoe.description,
+					size: shoe.size,
+					wear: shoe.wear,
+					lot: shoe.lot,
+					price: shoe.price
+				}).eq("id", shoe.id).then(({ error }) => {
+					if (error) console.error("Save failed for", shoe.id, error);
+				});
+			});
+		};
+
 		const exitEditMode = () => {
+			saveAllCards();
 			state.editMode = false;
 			filtersWrap.classList.remove("hidden");
 			addItemWrap.classList.remove("visible");
+			footerSaveBtn.classList.remove("visible");
 			heroCopy.removeAttribute("contenteditable");
 			heroCopy.classList.remove("hero-editable");
 			renderCards();
 		};
+
+		footerSaveBtn.addEventListener("click", (e) => {
+			e.stopPropagation();
+			exitEditMode();
+		});
 
 		editIconBtn.addEventListener("click", (e) => {
 			e.stopPropagation();
