@@ -18,6 +18,8 @@ ms.date: 2026-04-24
 * R10: Contact Button Overlay
 * R11: Footer
 * R12: Edit Mode
+* R13: Auto Assign Lots
+* R14: Image Updates
 
 ## Task checklist
 
@@ -240,5 +242,21 @@ ms.date: 2026-04-24
 * [x] Task 55: Add photo upload capability to each card in edit mode
 	Satisfies: R12
 	Done when: Each card in edit mode has an upload control that lets the user select an image file, which replaces the placeholder or existing photo.
+
+* [x] Task 56: Auto-generate a unique lot number when adding a new item
+	Satisfies: R13
+	Done when: Clicking Add Item assigns a lot number that is unique across all existing shoes, including previously deleted lots. Keep these incremental starting from 001 with a three digit "###" format.
+
+* [x] Task 57: Prevent lot number collisions with previously used values
+	Satisfies: R13
+	Done when: The generated lot number is checked against the full history of lots in the database so no duplicates occur.
+
+* [x] Task 58: Open a full-screen modal when a shoe image is clicked or tapped
+	Satisfies: R14
+	Done when: Clicking a shoe image in view mode opens a modal overlay displaying the image at full screen with a close control.
+
+* [x] Task 59: Center uploaded images vertically inside the card image container
+	Satisfies: R14
+	Done when: Shoe images are vertically centered within the image area so the shoe is not cropped at the bottom, especially on desktop.
 
 
